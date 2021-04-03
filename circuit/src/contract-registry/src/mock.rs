@@ -1,4 +1,4 @@
-use crate as pallet_template;
+use crate as pallet_contract_registry;
 use frame_support::parameter_types;
 use frame_system as system;
 use sp_core::H256;
@@ -18,7 +18,7 @@ frame_support::construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        ContractRegistry: pallet_template::{Module, Call, Storage, Event<T>},
+        ContractRegistryModule: pallet_contract_registry::{Module, Call, Storage, Event<T>},
     }
 );
 
@@ -52,7 +52,7 @@ impl system::Config for Test {
     type SS58Prefix = SS58Prefix;
 }
 
-impl pallet_template::Config for Test {
+impl pallet_contract_registry::Config for Test {
     type Event = Event;
 }
 
@@ -62,4 +62,12 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
         .build_storage::<Test>()
         .unwrap()
         .into()
+}
+
+pub const REQUESTER: u64 = 3;
+pub const CODE_TXT: &'static str = "(module)";
+pub const BYTES: &[u8; 8] = &[ 0, 97, 115, 109, 1, 0, 0, 0 ];
+
+pub fn contract_name(nonce: u8) -> Vec<u8> {
+    format!("MockRegistryContractV{}", nonce).into_bytes()
 }

@@ -2,7 +2,7 @@
 
 use codec::{Decode, Encode};
 use frame_support::{decl_error, decl_event, decl_module, decl_storage, dispatch, traits::Get};
-use frame_system::{self, ensure_root};
+use frame_system::ensure_root;
 
 #[cfg(test)]
 mod mock;

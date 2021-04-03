@@ -62,7 +62,7 @@ TemplatePallet: pallet_template::{Module, Call, Storage, Event<T>},
 
 ### Genesis Configuration
 
-This template pallet does not have any genesis configuration.
+The `contract-registry` pallet does not have any genesis configuration.
 
 ## Reference Docs
 
@@ -71,3 +71,4 @@ You can view the reference docs for this pallet by running:
 ```
 cargo doc --open
 ```
+
