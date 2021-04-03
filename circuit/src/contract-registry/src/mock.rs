@@ -66,8 +66,8 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 
 pub const REQUESTER: u64 = 3;
 pub const CODE_TXT: &'static str = "(module)";
-pub const BYTES: &[u8; 8] = &[ 0, 97, 115, 109, 1, 0, 0, 0 ];
+pub const BYTES: &[u8; 8] = &[0, 97, 115, 109, 1, 0, 0, 0];
 
-pub fn contract_name(nonce: u8) -> Vec<u8> {
-    format!("MockRegistryContractV{}", nonce).into_bytes()
+pub fn contract_name(version: u8) -> Vec<u8> {
+    format!("MockRegistryContractV{}", version).into()
 }

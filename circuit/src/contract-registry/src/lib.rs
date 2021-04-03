@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::{decl_error, decl_event, decl_module, decl_storage, dispatch, traits::Get};
+use frame_support::{decl_error, decl_event, decl_module, decl_storage, dispatch};
 use frame_system::ensure_root;
 
 #[cfg(test)]
@@ -14,6 +14,7 @@ pub trait Config: frame_system::Config {
     type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
 }
 
+/// A preliminary representation of a contract in the onchain registry.
 #[derive(PartialEq, Eq, Encode, Decode, Default, Clone)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct ComposableContract {
@@ -36,17 +37,15 @@ decl_event!(
         AccountId = <T as frame_system::Config>::AccountId,
     {
         // Event parameters [requester, contract_name]
-        ComposableContractStored(AccountId, Vec<u8>),
+        ContractStored(AccountId, Vec<u8>),
         // Event parameters [requester, contract_name]
-        ComposableContractPurged(AccountId, Vec<u8>),
+        ContractPurged(AccountId, Vec<u8>),
     }
 );
 
 decl_error! {
     pub enum Error for Module<T: Config> {}
 }
-
-// HELP: https://github.com/paritytech/substrate/blob/master/frame/example/src/lib.rs
 
 decl_module! {
     pub struct Module<T: Config> for enum Call where origin: T::Origin {
@@ -56,12 +55,12 @@ decl_module! {
         /// Inserts a contract to the on-chain registry. Root only access.
         /// TODO weight
         #[weight = 10_419]
-        pub fn insert_contract(origin, requester: T::AccountId, contract_name: Vec<u8>, contract:ComposableContract) -> dispatch::DispatchResult {
+        pub fn store_contract(origin, requester: T::AccountId, contract_name: Vec<u8>, contract:ComposableContract) -> dispatch::DispatchResult {
             ensure_root(origin)?;
 
             <Registry<T>>::insert(&requester, &contract_name, contract);
 
-            Self::deposit_event(RawEvent::ComposableContractStored(requester, contract_name));
+            Self::deposit_event(RawEvent::ContractStored(requester, contract_name));
 
             Ok(())
         }
@@ -69,12 +68,12 @@ decl_module! {
         /// Removes a contract from the on-chain registry. Root only access.
         /// TODO weight
         #[weight = 10_419]
-        pub fn remove_contract(origin, requester: T::AccountId, contract_name: Vec<u8>) -> dispatch::DispatchResult {
+        pub fn purge_contract(origin, requester: T::AccountId, contract_name: Vec<u8>) -> dispatch::DispatchResult {
             ensure_root(origin)?;
 
             <Registry<T>>::remove(&requester, &contract_name);
 
-            Self::deposit_event(RawEvent::ComposableContractPurged(requester, contract_name));
+            Self::deposit_event(RawEvent::ContractPurged(requester, contract_name));
 
             Ok(())
         }
