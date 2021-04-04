@@ -1,5 +1,5 @@
 use crate as pallet_contract_registry;
-use frame_support::parameter_types;
+use frame_support::{parameter_types, traits::{OnInitialize, OnFinalize},};
 use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
@@ -10,7 +10,6 @@ use sp_runtime::{
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
-// Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
     pub enum Test where
         Block = Block,
@@ -56,7 +55,6 @@ impl pallet_contract_registry::Config for Test {
     type Event = Event;
 }
 
-// Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
     system::GenesisConfig::default()
         .build_storage::<Test>()
@@ -65,9 +63,22 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 pub const REQUESTER: u64 = 3;
+pub const ANOTHER_REQUESTER: u64 = 4;
 pub const CODE_TXT: &'static str = "(module)";
 pub const BYTES: &[u8; 8] = &[0, 97, 115, 109, 1, 0, 0, 0];
 
+/// Generate a mock contract name byte vector.
 pub fn contract_name(version: u8) -> Vec<u8> {
     format!("MockRegistryContractV{}", version).into()
+}
+
+/// Run until a particular block.
+pub fn run_to_block(n: u64) {
+	while System::block_number() < n {
+		if System::block_number() > 1 {
+			System::on_finalize(System::block_number());
+		}
+		System::set_block_number(System::block_number() + 1);
+		System::on_initialize(System::block_number());
+	}
 }
