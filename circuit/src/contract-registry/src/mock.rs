@@ -64,12 +64,20 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 
 pub const REQUESTER: u64 = 3;
 pub const ANOTHER_REQUESTER: u64 = 4;
-pub const CODE_TXT: &'static str = "(module)";
-pub const BYTES: &[u8; 8] = &[0, 97, 115, 109, 1, 0, 0, 0];
 
-/// Generate a mock contract name byte vector.
-pub fn contract_name(version: u8) -> Vec<u8> {
-    format!("MockRegistryContractV{}", version).into()
+/// Generate the mock contract name byte vector.
+pub fn contract_name() -> Vec<u8> {
+    b"MockRegistryContractV0".to_vec()
+}
+
+/// Generate the mock contract source code byte vector.
+pub fn code_txt() -> Vec<u8> {
+    b"(module)".to_vec()
+}
+
+/// Generate the mock contract bytecode byte vector.
+pub fn bytes() -> Vec<u8> {
+    vec![0, 97, 115, 109, 1, 0, 0, 0]
 }
 
 /// Run until a particular block.
