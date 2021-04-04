@@ -1,4 +1,4 @@
-use crate as pallet_contract_registry;
+use crate as pallet_registry;
 use frame_support::{
     parameter_types,
     traits::{OnFinalize, OnInitialize},
@@ -20,7 +20,7 @@ frame_support::construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        ContractRegistryModule: pallet_contract_registry::{Module, Call, Storage, Event<T>},
+        Registry: pallet_registry::{Module, Call, Storage, Event<T>},
     }
 );
 
@@ -54,7 +54,7 @@ impl system::Config for Test {
     type SS58Prefix = SS58Prefix;
 }
 
-impl pallet_contract_registry::Config for Test {
+impl pallet_registry::Config for Test {
     type Event = Event;
 }
 

@@ -1,7 +1,11 @@
 #![allow(unused_must_use)]
 
-use crate::{mock::*, Event as RegistryEvent, Registry, RegistryContract};
-use frame_support::{assert_err, assert_ok, assert_storage_noop, StorageDoubleMap};
+use crate::{
+    mock::*, ContractRegistry, Event as RegistryEvent, RegistryContract,
+};
+use frame_support::{
+    assert_err, assert_ok, assert_storage_noop, StorageDoubleMap,
+};
 use frame_system::{EventRecord, Phase};
 use sp_runtime::traits::BadOrigin;
 
@@ -14,7 +18,7 @@ fn it_stores_a_contract_in_the_registry() {
     new_test_ext().execute_with(|| {
         run_to_block(2);
 
-        assert_ok!(ContractRegistryModule::store_contract(
+        assert_ok!(Registry::store_contract(
             Origin::root(),
             REQUESTER,
             contract_name(),
@@ -25,16 +29,21 @@ fn it_stores_a_contract_in_the_registry() {
             },
         ));
 
-        assert!(<Registry<Test>>::contains_key(REQUESTER, contract_name()));
+        assert!(<ContractRegistry<Test>>::contains_key(
+            REQUESTER,
+            contract_name()
+        ));
 
         assert_eq!(
             System::events(),
             vec![EventRecord {
                 phase: Phase::Initialization,
-                event: Event::pallet_contract_registry(RegistryEvent::<Test>::ContractStored(
-                    REQUESTER,
-                    contract_name(),
-                )),
+                event: Event::pallet_registry(
+                    RegistryEvent::<Test>::ContractStored(
+                        REQUESTER,
+                        contract_name(),
+                    )
+                ),
                 topics: vec![],
             }]
         );
@@ -46,7 +55,7 @@ fn it_stores_idempotent() {
     new_test_ext().execute_with(|| {
         run_to_block(2);
 
-        assert_ok!(ContractRegistryModule::store_contract(
+        assert_ok!(Registry::store_contract(
             Origin::root(),
             REQUESTER,
             contract_name(),
@@ -57,7 +66,7 @@ fn it_stores_idempotent() {
             },
         ));
 
-        let dispatch = ContractRegistryModule::store_contract(
+        let dispatch = Registry::store_contract(
             Origin::root(),
             REQUESTER,
             contract_name(),
@@ -76,10 +85,12 @@ fn it_stores_idempotent() {
             System::events(),
             vec![EventRecord {
                 phase: Phase::Initialization,
-                event: Event::pallet_contract_registry(RegistryEvent::<Test>::ContractStored(
-                    REQUESTER,
-                    contract_name(),
-                )),
+                event: Event::pallet_registry(
+                    RegistryEvent::<Test>::ContractStored(
+                        REQUESTER,
+                        contract_name(),
+                    )
+                ),
                 topics: vec![],
             }]
         );
@@ -91,7 +102,7 @@ fn it_removes_a_contract_from_the_registry() {
     new_test_ext().execute_with(|| {
         run_to_block(2);
 
-        assert_ok!(ContractRegistryModule::store_contract(
+        assert_ok!(Registry::store_contract(
             Origin::root(),
             REQUESTER,
             contract_name(),
@@ -102,31 +113,38 @@ fn it_removes_a_contract_from_the_registry() {
             },
         ));
 
-        assert_ok!(ContractRegistryModule::purge_contract(
+        assert_ok!(Registry::purge_contract(
             Origin::root(),
             REQUESTER,
             contract_name()
         ));
 
-        assert!(!<Registry<Test>>::contains_key(REQUESTER, contract_name()));
+        assert!(!<ContractRegistry<Test>>::contains_key(
+            REQUESTER,
+            contract_name()
+        ));
 
         assert_eq!(
             System::events(),
             vec![
                 EventRecord {
                     phase: Phase::Initialization,
-                    event: Event::pallet_contract_registry(RegistryEvent::<Test>::ContractStored(
-                        REQUESTER,
-                        contract_name(),
-                    )),
+                    event: Event::pallet_registry(
+                        RegistryEvent::<Test>::ContractStored(
+                            REQUESTER,
+                            contract_name(),
+                        )
+                    ),
                     topics: vec![],
                 },
                 EventRecord {
                     phase: Phase::Initialization,
-                    event: Event::pallet_contract_registry(RegistryEvent::<Test>::ContractPurged(
-                        REQUESTER,
-                        contract_name(),
-                    )),
+                    event: Event::pallet_registry(
+                        RegistryEvent::<Test>::ContractPurged(
+                            REQUESTER,
+                            contract_name(),
+                        )
+                    ),
                     topics: vec![],
                 },
             ]
@@ -139,7 +157,7 @@ fn it_removes_idempotent() {
     new_test_ext().execute_with(|| {
         run_to_block(2);
 
-        assert_ok!(ContractRegistryModule::store_contract(
+        assert_ok!(Registry::store_contract(
             Origin::root(),
             REQUESTER,
             contract_name(),
@@ -150,14 +168,17 @@ fn it_removes_idempotent() {
             },
         ));
 
-        assert_ok!(ContractRegistryModule::purge_contract(
+        assert_ok!(Registry::purge_contract(
             Origin::root(),
             REQUESTER,
             contract_name()
         ));
 
-        let dispatch =
-            ContractRegistryModule::purge_contract(Origin::root(), REQUESTER, contract_name());
+        let dispatch = Registry::purge_contract(
+            Origin::root(),
+            REQUESTER,
+            contract_name(),
+        );
 
         assert_ok!(dispatch);
 
@@ -168,18 +189,22 @@ fn it_removes_idempotent() {
             vec![
                 EventRecord {
                     phase: Phase::Initialization,
-                    event: Event::pallet_contract_registry(RegistryEvent::<Test>::ContractStored(
-                        REQUESTER,
-                        contract_name(),
-                    )),
+                    event: Event::pallet_registry(
+                        RegistryEvent::<Test>::ContractStored(
+                            REQUESTER,
+                            contract_name(),
+                        )
+                    ),
                     topics: vec![],
                 },
                 EventRecord {
                     phase: Phase::Initialization,
-                    event: Event::pallet_contract_registry(RegistryEvent::<Test>::ContractPurged(
-                        REQUESTER,
-                        contract_name(),
-                    )),
+                    event: Event::pallet_registry(
+                        RegistryEvent::<Test>::ContractPurged(
+                            REQUESTER,
+                            contract_name(),
+                        )
+                    ),
                     topics: vec![],
                 },
             ]
@@ -190,8 +215,11 @@ fn it_removes_idempotent() {
 #[test]
 fn it_stores_contracts_separately_per_requester() {
     assert_ne!(
-        <Registry<Test>>::hashed_key_for(REQUESTER, contract_name()),
-        <Registry<Test>>::hashed_key_for(ANOTHER_REQUESTER, contract_name())
+        <ContractRegistry<Test>>::hashed_key_for(REQUESTER, contract_name()),
+        <ContractRegistry<Test>>::hashed_key_for(
+            ANOTHER_REQUESTER,
+            contract_name()
+        )
     );
 }
 
@@ -201,7 +229,7 @@ fn it_fails_for_non_root_origins() {
         run_to_block(2);
 
         assert_err!(
-            ContractRegistryModule::store_contract(
+            Registry::store_contract(
                 Origin::signed(419),
                 REQUESTER,
                 contract_name(),
@@ -215,7 +243,7 @@ fn it_fails_for_non_root_origins() {
         );
 
         assert_err!(
-            ContractRegistryModule::store_contract(
+            Registry::store_contract(
                 Origin::none(),
                 REQUESTER,
                 contract_name(),
@@ -229,7 +257,7 @@ fn it_fails_for_non_root_origins() {
         );
 
         assert_err!(
-            ContractRegistryModule::purge_contract(
+            Registry::purge_contract(
                 Origin::signed(419),
                 REQUESTER,
                 contract_name(),
@@ -238,7 +266,7 @@ fn it_fails_for_non_root_origins() {
         );
 
         assert_err!(
-            ContractRegistryModule::purge_contract(
+            Registry::purge_contract(
                 Origin::none(),
                 REQUESTER,
                 contract_name(),
