@@ -190,6 +190,8 @@ fn it_removes_idempotent() {
 
 // #[test]
 // fn it_stores_contracts_separately_per_requester() {
+    // generate storage keys for same contract but different requesters..
+    // ..and assert these keys are different
 //     new_test_ext().execute_with(|| {});
 // }
 
