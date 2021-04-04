@@ -7,4 +7,5 @@
 + figure out how to iterate all contracts & all `contracts[requester]` ✔️
   + ITERATING FRAME STORAGE: [StoragePrefixedMap#iter_values](https://substrate.dev/rustdocs/v3.0.0/ frame_support/storage/trait.StoragePrefixedMap.html#method.iter_values) ✔️
 + have the fetch_contracts RPC method serve contracts from substrate-archive
++ make sure there are proper docs & doctests
   

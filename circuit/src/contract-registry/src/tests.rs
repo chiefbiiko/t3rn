@@ -7,7 +7,7 @@ use sp_runtime::traits::BadOrigin;
 
 // NOTE
 // Using `run_to_block(2)` cos block#1 never includes events.
-// Annotation #![allow(unused_must_use)] cos `assert_storage_noop` complains
+// Annotation #![allow(unused_must_use)] cos `assert_storage_noop` complains.
 
 #[test]
 fn it_stores_a_contract_in_the_registry() {
