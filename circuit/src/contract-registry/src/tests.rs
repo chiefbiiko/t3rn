@@ -1,14 +1,12 @@
-use crate::{mock::*, ComposableContract, Error, Registry};
-use frame_support::{assert_ok, assert_storage_noop, StorageDoubleMap, runtime_print};
-use frame_system::{self as system, EventRecord, Phase};
+use crate::{mock::*, ComposableContract, Error, Event as RegistryEvent, Registry};
+use frame_support::{assert_ok, assert_storage_noop, StorageDoubleMap};
+use frame_system::{EventRecord, Phase};
 
 #[test]
 fn it_inserts_a_contract_into_the_registry() {
     new_test_ext().execute_with(|| {
         // Fast forwarding to block#2 because block#1 does not include events.
         run_to_block(2);
-
-        // let event_count_before = <system::Module<Test>>::event_count();
 
         let dispatch_result = ContractRegistryModule::store_contract(
             Origin::root(),
@@ -27,75 +25,16 @@ fn it_inserts_a_contract_into_the_registry() {
 
         assert!(exists);
 
-        assert_eq!(System::events(), vec![
-                        EventRecord {
-                phase: Phase::Initialization,
-                event: Event::pallet_contract_registry(crate::Event::ContractStored(REQUESTER, contract_name())),
-                topics: vec![],
-            },
-            // EventRecord {
-            //     phase: Phase::Initialization,
-            //     event: Event::frame_system(frame_system::Event::NewAccount(ALICE.clone())),
-            //     topics: vec![],
-            // },
-            // EventRecord {
-            //     phase: Phase::Initialization,
-            //     event: Event::pallet_balances(
-            //         pallet_balances::Event::Endowed(ALICE, 1_000_000)
-            //     ),
-            //     topics: vec![],
-            // },
-            // EventRecord {
-            //     phase: Phase::Initialization,
-            //     event: Event::frame_system(frame_system::Event::NewAccount(addr.clone())),
-            //     topics: vec![],
-            // },
-            // EventRecord {
-            //     phase: Phase::Initialization,
-            //     event: Event::pallet_balances(
-            //         pallet_balances::Event::Endowed(addr.clone(), subsistence * 100)
-            //     ),
-            //     topics: vec![],
-            // },
-            // EventRecord {
-            //     phase: Phase::Initialization,
-            //     event: Event::pallet_balances(
-            //         pallet_balances::Event::Transfer(ALICE, addr.clone(), subsistence * 100)
-            //     ),
-            //     topics: vec![],
-            // },
-            // EventRecord {
-            //     phase: Phase::Initialization,
-            //     event: Event::pallet_contracts(crate::Event::CodeStored(code_hash.into())),
-            //     topics: vec![],
-            // },
-            // EventRecord {
-            //     phase: Phase::Initialization,
-            //     event: Event::pallet_contracts(
-            //         crate::Event::ContractEmitted(addr.clone(), vec![1, 2, 3, 4])
-            //     ),
-            //     topics: vec![],
-            // },
-            // EventRecord {
-            //     phase: Phase::Initialization,
-            //     event: Event::pallet_contracts(crate::Event::Instantiated(ALICE, addr.clone())),
-            //     topics: vec![],
-            // },
-        ]);
+        let expected_events = vec![EventRecord {
+            phase: Phase::Initialization,
+            event: Event::pallet_contract_registry(RegistryEvent::<Test>::ContractStored(
+                REQUESTER,
+                contract_name(),
+            )),
+            topics: vec![],
+        }];
 
-        // let event_count_after = <system::Module<Test>>::event_count();
-
-        // let events = <system::Module<Test>>::events();
-
-        // let event = events[0].event.clone();
-
-        // assert_eq!(event, ContractRegistryModule::ContractStored(REQUESTER, contract_name()));
-        // assert_eq!(event, <ContractStored<Test>>(REQUESTER, contract_name()));
-        // runtime_print!("event {:?}", event);
-
-        // FIXME: Ideally tests should explicitely check event specifics..
-        // ..not just the count.
-        // assert!(event_count_after == event_count_before + 1);
+        assert_eq!(System::events(), expected_events);
     });
 }
 

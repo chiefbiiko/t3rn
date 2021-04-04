@@ -60,7 +60,8 @@ decl_module! {
 
             <Registry<T>>::insert(&requester, &contract_name, contract);
 
-            Self::deposit_event(RawEvent::ContractStored(requester, contract_name));
+            // Self::deposit_event(RawEvent::ContractStored(requester, contract_name));
+            Self::deposit_event(Event::<T>::ContractStored(requester, contract_name));
 
             Ok(())
         }
