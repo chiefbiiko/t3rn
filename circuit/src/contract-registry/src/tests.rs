@@ -1,18 +1,24 @@
-use crate::{mock::*, ComposableContract, Error, Event as RegistryEvent, Registry};
-use frame_support::{assert_ok, assert_storage_noop, StorageDoubleMap};
+#![allow(unused_must_use)]
+
+use crate::{mock::*, Event as RegistryEvent, Registry, RegistryContract};
+use frame_support::{assert_err, assert_ok, assert_storage_noop, StorageDoubleMap};
 use frame_system::{EventRecord, Phase};
+use sp_runtime::traits::BadOrigin;
+
+// NOTE
+// Using `run_to_block(2)` cos block#1 never includes events.
+// Annotation #![allow(unused_must_use)] cos `assert_storage_noop` complains
 
 #[test]
-fn it_inserts_a_contract_into_the_registry() {
+fn it_stores_a_contract_in_the_registry() {
     new_test_ext().execute_with(|| {
-        // Fast forwarding to block#2 because block#1 does not include events.
         run_to_block(2);
 
         assert_ok!(ContractRegistryModule::store_contract(
             Origin::root(),
             REQUESTER,
             contract_name(),
-            ComposableContract {
+            RegistryContract {
                 code_txt: code_txt(),
                 bytes: bytes(),
                 abi: None,
@@ -36,32 +42,35 @@ fn it_inserts_a_contract_into_the_registry() {
 }
 
 #[test]
-fn it_inserts_idempotent() {
+fn it_stores_idempotent() {
     new_test_ext().execute_with(|| {
-        // Fast forwarding to block#2 because block#1 does not include events.
         run_to_block(2);
 
         assert_ok!(ContractRegistryModule::store_contract(
             Origin::root(),
             REQUESTER,
             contract_name(),
-            ComposableContract {
+            RegistryContract {
                 code_txt: code_txt(),
                 bytes: bytes(),
                 abi: None,
             },
         ));
 
-        assert_storage_noop!(ContractRegistryModule::store_contract(
+        let dispatch = ContractRegistryModule::store_contract(
             Origin::root(),
             REQUESTER,
             contract_name(),
-            ComposableContract {
+            RegistryContract {
                 code_txt: code_txt(),
                 bytes: bytes(),
                 abi: None,
             },
-        ));
+        );
+
+        assert_ok!(dispatch);
+
+        assert_storage_noop!(dispatch);
 
         assert_eq!(
             System::events(),
@@ -80,14 +89,13 @@ fn it_inserts_idempotent() {
 #[test]
 fn it_removes_a_contract_from_the_registry() {
     new_test_ext().execute_with(|| {
-        // Fast forwarding to block#2 because block#1 does not include events.
         run_to_block(2);
 
         assert_ok!(ContractRegistryModule::store_contract(
             Origin::root(),
             REQUESTER,
             contract_name(),
-            ComposableContract {
+            RegistryContract {
                 code_txt: code_txt(),
                 bytes: bytes(),
                 abi: None,
@@ -129,14 +137,13 @@ fn it_removes_a_contract_from_the_registry() {
 #[test]
 fn it_removes_idempotent() {
     new_test_ext().execute_with(|| {
-        // Fast forwarding to block#2 because block#1 does not include events.
         run_to_block(2);
 
         assert_ok!(ContractRegistryModule::store_contract(
             Origin::root(),
             REQUESTER,
             contract_name(),
-            ComposableContract {
+            RegistryContract {
                 code_txt: code_txt(),
                 bytes: bytes(),
                 abi: None,
@@ -149,11 +156,12 @@ fn it_removes_idempotent() {
             contract_name()
         ));
 
-        assert_storage_noop!(ContractRegistryModule::purge_contract(
-            Origin::root(),
-            REQUESTER,
-            contract_name()
-        ));
+        let dispatch =
+            ContractRegistryModule::purge_contract(Origin::root(), REQUESTER, contract_name());
+
+        assert_ok!(dispatch);
+
+        assert_storage_noop!(dispatch);
 
         assert_eq!(
             System::events(),
@@ -179,19 +187,65 @@ fn it_removes_idempotent() {
     });
 }
 
-// #[test]
-// fn it_stores_contracts_separately_per_requester() {
-// generate storage keys for same contract but different requesters..
-// ..and assert these keys are different
-//     new_test_ext().execute_with(|| {});
-// }
+#[test]
+fn it_stores_contracts_separately_per_requester() {
+    assert_ne!(
+        <Registry<Test>>::hashed_key_for(REQUESTER, contract_name()),
+        <Registry<Test>>::hashed_key_for(ANOTHER_REQUESTER, contract_name())
+    );
+}
 
-// #[test]
-// fn store_fails_for_non_root_origins() {
-//     new_test_ext().execute_with(|| {});
-// }
+#[test]
+fn it_fails_for_non_root_origins() {
+    new_test_ext().execute_with(|| {
+        run_to_block(2);
 
-// #[test]
-// fn remove_fails_for_non_root_origins() {
-//     new_test_ext().execute_with(|| {});
-// }
+        assert_err!(
+            ContractRegistryModule::store_contract(
+                Origin::signed(419),
+                REQUESTER,
+                contract_name(),
+                RegistryContract {
+                    code_txt: code_txt(),
+                    bytes: bytes(),
+                    abi: None,
+                },
+            ),
+            BadOrigin
+        );
+
+        assert_err!(
+            ContractRegistryModule::store_contract(
+                Origin::none(),
+                REQUESTER,
+                contract_name(),
+                RegistryContract {
+                    code_txt: code_txt(),
+                    bytes: bytes(),
+                    abi: None,
+                },
+            ),
+            BadOrigin
+        );
+
+        assert_err!(
+            ContractRegistryModule::purge_contract(
+                Origin::signed(419),
+                REQUESTER,
+                contract_name(),
+            ),
+            BadOrigin
+        );
+
+        assert_err!(
+            ContractRegistryModule::purge_contract(
+                Origin::none(),
+                REQUESTER,
+                contract_name(),
+            ),
+            BadOrigin
+        );
+
+        assert_eq!(System::events(), vec![]);
+    });
+}

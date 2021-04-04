@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::{decl_error, decl_event, decl_module, decl_storage, dispatch, fail};
+use frame_support::{decl_error, decl_event, decl_module, decl_storage, dispatch};
 use frame_system::ensure_root;
 
 #[cfg(test)]
@@ -17,7 +17,7 @@ pub trait Config: frame_system::Config {
 /// A preliminary representation of a contract in the onchain registry.
 #[derive(PartialEq, Eq, Encode, Decode, Default, Clone)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub struct ComposableContract {
+pub struct RegistryContract {
     code_txt: Vec<u8>,
     bytes: Vec<u8>,
     abi: Option<Vec<u8>>,
@@ -25,9 +25,9 @@ pub struct ComposableContract {
 
 decl_storage! {
     trait Store for Module<T: Config> as ContractRegistry {
-        /// ( requester, contract_name ) -> Option<ComposableContract>
+        /// ( requester, contract_name ) -> Option<RegistryContract>
         Registry get(fn registry):
-          double_map hasher(blake2_128_concat) T::AccountId, hasher(blake2_128_concat) Vec<u8> => Option<ComposableContract>;
+          double_map hasher(blake2_128_concat) T::AccountId, hasher(blake2_128_concat) Vec<u8> => Option<RegistryContract>;
     }
 }
 
@@ -55,7 +55,7 @@ decl_module! {
         /// Inserts a contract to the on-chain registry. Root only access.
         /// TODO weight
         #[weight = 10_419]
-        pub fn store_contract(origin, requester: T::AccountId, contract_name: Vec<u8>, contract:ComposableContract) -> dispatch::DispatchResult {
+        pub fn store_contract(origin, requester: T::AccountId, contract_name: Vec<u8>, contract:RegistryContract) -> dispatch::DispatchResult {
             ensure_root(origin)?;
 
             if ! <Registry<T>>::contains_key(&requester, &contract_name) {
