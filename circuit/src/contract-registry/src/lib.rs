@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::{decl_error, decl_event, decl_module, decl_storage, dispatch};
+use frame_support::{decl_error, decl_event, decl_module, decl_storage, dispatch, fail};
 use frame_system::ensure_root;
 
 #[cfg(test)]
@@ -58,10 +58,11 @@ decl_module! {
         pub fn store_contract(origin, requester: T::AccountId, contract_name: Vec<u8>, contract:ComposableContract) -> dispatch::DispatchResult {
             ensure_root(origin)?;
 
-            <Registry<T>>::insert(&requester, &contract_name, contract);
+            if ! <Registry<T>>::contains_key(&requester, &contract_name) {
+                <Registry<T>>::insert(&requester, &contract_name, contract);
 
-            // Self::deposit_event(RawEvent::ContractStored(requester, contract_name));
-            Self::deposit_event(Event::<T>::ContractStored(requester, contract_name));
+                Self::deposit_event(Event::<T>::ContractStored(requester, contract_name));
+            }
 
             Ok(())
         }
@@ -72,9 +73,11 @@ decl_module! {
         pub fn purge_contract(origin, requester: T::AccountId, contract_name: Vec<u8>) -> dispatch::DispatchResult {
             ensure_root(origin)?;
 
-            <Registry<T>>::remove(&requester, &contract_name);
+            if <Registry<T>>::contains_key(&requester, &contract_name) {
+                <Registry<T>>::remove(&requester, &contract_name);
 
-            Self::deposit_event(RawEvent::ContractPurged(requester, contract_name));
+                Self::deposit_event(RawEvent::ContractPurged(requester, contract_name));
+            }
 
             Ok(())
         }

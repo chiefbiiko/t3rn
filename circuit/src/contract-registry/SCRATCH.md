@@ -2,7 +2,7 @@
 
 + unit testin nascent contract-registry storage
   + TODO: complete outlined test cases
-  + why are there no events in the system pallet's storage
+  + check `assert_storage_noop!`
 + offchain storage - substrate archive on the side ?!
 + figure out how to iterate all contracts & all `contracts[requester]`
   + ITERATING FRAME STORAGE: [StoragePrefixedMap#iter_values](https://substrate.dev/rustdocs/v3.0.0/frame_support/storage/trait.StoragePrefixedMap.html#method.iter_values)
