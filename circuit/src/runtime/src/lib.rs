@@ -68,6 +68,7 @@ pub use pallet_bridge_messages::Call as MessagesCall;
 pub use pallet_substrate_bridge::Call as BridgeGatewayCall;
 pub use pallet_sudo::Call as SudoCall;
 pub use pallet_timestamp::Call as TimestampCall;
+pub use pallet_registry::Call as RegistryCall;
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -376,6 +377,10 @@ impl pallet_bridge_messages::Config for Runtime {
 	type MessageDispatch = crate::gateway_messages::FromGatewayMessageDispatch;
 }
 
+impl pallet_registry::Config for Runtime {
+	type Event = Event;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -398,6 +403,7 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
 		ShiftSessionManager: pallet_shift_session_manager::{Module},
+		Registry: pallet_registry::{Module, Call, Storage, Event<T>},
 	}
 );
 

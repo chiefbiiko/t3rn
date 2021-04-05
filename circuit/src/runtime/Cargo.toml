@@ -45,6 +45,7 @@ pallet-multi-finality-verifier = { git = "https://github.com/MaciejBaj/parity-br
 pallet-bridge-messages = { git = "https://github.com/MaciejBaj/parity-bridges-common", branch = "development", default-features = false }
 pallet-shift-session-manager = { git = "https://github.com/MaciejBaj/parity-bridges-common", branch = "development", default-features = false }
 pallet-substrate-bridge = { git = "https://github.com/MaciejBaj/parity-bridges-common", branch = "development", default-features = false }
+pallet-registry = { path = "../registry", default-features = false, version = "3.0.0" }
 
 #bp-header-chain = { git = "https://github.com/MaciejBaj/parity-bridges-common", branch = "development" , default-features = false }
 #bp-messages = { git = "https://github.com/MaciejBaj/parity-bridges-common", branch = "development" , default-features = false }
