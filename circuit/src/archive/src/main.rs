@@ -20,8 +20,8 @@ use std::sync::{
 	Arc,
 };
 
-use node_template::service::Executor;
-use node_template_runtime::{opaque::Block, RuntimeApi};
+use circuit::service::Executor;
+use circuit_runtime::{opaque::Block, RuntimeApi};
 
 use substrate_archive::{Archive, ArchiveBuilder, SecondaryRocksDb};
 

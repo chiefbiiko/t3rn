@@ -1,7 +1,7 @@
 [chain]
 # Must be an absolute path to chain data db (no ~/)
 # Can also be specified via the `CHAIN_DATA_DB` environment variable
-data_path = "/.local/share/node-template/chains/dev/db"
+data_path = "$HOME/.local/share/io.t3rn.circuit/chains/dev/db"
 
 # How much should the read-only database keep in cache (MB)
 # Optional, default: 128

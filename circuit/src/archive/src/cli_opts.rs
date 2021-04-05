@@ -29,14 +29,14 @@ pub struct CliOpts {
 	pub config: Option<PathBuf>,
 	/// Sets spec for chain to run in (dev/local).
 	#[structopt(short = "s", long = "spec", name = "CHAIN", parse(from_str = parse_chain_spec))]
-	pub chain_spec: node_template::chain_spec::ChainSpec,
+	pub chain_spec: cicuit::chain_spec::ChainSpec,
 }
 
-fn parse_chain_spec(spec: &str) -> node_template::chain_spec::ChainSpec {
+fn parse_chain_spec(spec: &str) -> circuit::chain_spec::ChainSpec {
 	let spec = match spec {
-		"dev" => node_template::chain_spec::development_config(),
-		"" | "local" => node_template::chain_spec::local_testnet_config(),
-		path => node_template::chain_spec::ChainSpec::from_json_file(PathBuf::from(path)),
+		"dev" => circuit::chain_spec::development_config(),
+		"" | "local" => circuit::chain_spec::local_testnet_config(),
+		path => circuit::chain_spec::ChainSpec::from_json_file(PathBuf::from(path)),
 	};
 	spec.expect("Chain spec could not be loaded")
 }
