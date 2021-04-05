@@ -6,7 +6,7 @@ homepage = 'https://t3rn.io'
 license = 'Unlicense'
 name = 'pallet-registry'
 repository = 'https://github.com/t3rn/t3rn'
-version = '3.0.0'
+version = '0.0.0'
 readme = "README.md"
 
 [package.metadata.docs.rs]
@@ -25,9 +25,8 @@ frame-system = { default-features = false, git = "https://github.com/paritytech/
 
 [dev-dependencies]
 serde = { version = "1.0.119" }
-# `dev-dependencies` will use `std` regardless - makin it explicit here
-sp-core = { features = ["std"], git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0"  }
-sp-io = { features = ["std"], git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0"  }
+sp-core = { features = ["std"], git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0" }
+sp-io = { features = ["std"], git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0" }
 sp-runtime = { features = ["std"], git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0" }
 
 [features]
