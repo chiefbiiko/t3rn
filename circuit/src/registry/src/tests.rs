@@ -22,7 +22,7 @@ fn it_stores_a_contract_in_the_registry() {
         ));
 
         assert_eq!(
-            Registry::contract(&REQUESTER, &contract_name()),
+            Registry::contract(REQUESTER, contract_name()),
             Some(contract())
         );
 
