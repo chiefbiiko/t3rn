@@ -17,8 +17,7 @@ pub trait Config: frame_system::Config {
 }
 
 /// A preliminary representation of a contract in the onchain registry.
-#[derive(PartialEq, Eq, Encode, Decode, Default, Clone)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(PartialEq, Eq, Encode, Decode, Default, Clone, Debug)]
 pub struct RegistryContract {
     code_txt: Vec<u8>,
     bytes: Vec<u8>,
