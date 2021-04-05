@@ -73,6 +73,10 @@ pub fn contract_name() -> Vec<u8> {
     b"MockRegistryContractV0".to_vec()
 }
 
+pub fn contract_name_hash() -> <Test as frame_system::Config>::Hash {
+    Test::Hashing::hash(contract_name())
+}
+
 /// The mock wasm noop registry contract.
 pub fn contract() -> pallet_registry::RegistryContract {
     pallet_registry::RegistryContract {
