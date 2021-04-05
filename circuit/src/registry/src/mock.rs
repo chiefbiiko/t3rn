@@ -73,14 +73,13 @@ pub fn contract_name() -> Vec<u8> {
     b"MockRegistryContractV0".to_vec()
 }
 
-/// Generate the mock contract source code byte vector.
-pub fn code_txt() -> Vec<u8> {
-    b"(module)".to_vec()
-}
-
-/// Generate the mock contract bytecode byte vector.
-pub fn bytes() -> Vec<u8> {
-    vec![0, 97, 115, 109, 1, 0, 0, 0]
+/// The mock wasm noop registry contract.
+pub fn contract() -> pallet_registry::RegistryContract {
+    pallet_registry::RegistryContract {
+        code_txt: b"(module)".to_vec(),
+        bytes: vec![0, 97, 115, 109, 1, 0, 0, 0],
+        abi: None,
+    }
 }
 
 /// Run until a particular block.

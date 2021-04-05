@@ -28,8 +28,8 @@ pub struct RegistryContract {
 decl_storage! {
     trait Store for Module<T: Config> as ContractRegistryModule {
         /// ( requester, contract_name ) -> Option<RegistryContract>
-        ContractRegistry get(fn contract_registry):
-            double_map 
+        ContractRegistry get(fn contract):
+            double_map
                 hasher(blake2_128_concat) T::AccountId,
                 hasher(blake2_128_concat) Vec<u8>
                     => Option<RegistryContract>;
@@ -49,7 +49,10 @@ decl_event!(
 );
 
 decl_error! {
-    pub enum Error for Module<T: Config> {}
+    pub enum Error for Module<T: Config> {
+        KeyDoesNotExist,
+        KeyAlreadyExists,
+    }
 }
 
 decl_module! {
@@ -67,10 +70,12 @@ decl_module! {
             contract: RegistryContract
         ) -> dispatch::DispatchResult {
             ensure_root(origin)?;
-            if !<ContractRegistry<T>>::contains_key(
+            if <ContractRegistry<T>>::contains_key(
                 &requester,
                 &contract_name
             ) {
+                Err(Error::<T>::KeyAlreadyExists)?
+            } else {
                 <ContractRegistry<T>>::insert(
                     &requester,
                     &contract_name,
@@ -79,8 +84,8 @@ decl_module! {
                 Self::deposit_event(
                     Event::<T>::ContractStored(requester, contract_name)
                 );
+                Ok(())
             }
-            Ok(())
         }
 
         /// Removes a contract from the on-chain registry. Root only access.
@@ -92,19 +97,18 @@ decl_module! {
             contract_name: Vec<u8>
         ) -> dispatch::DispatchResult {
             ensure_root(origin)?;
-            if <ContractRegistry<T>>::contains_key(
+            if !<ContractRegistry<T>>::contains_key(
                 &requester,
                 &contract_name
             ) {
-                <ContractRegistry<T>>::remove(
-                    &requester,
-                    &contract_name
-                );
+                Err(Error::<T>::KeyDoesNotExist)?
+            } else {
+                <ContractRegistry<T>>::remove(&requester, &contract_name);
                 Self::deposit_event(
                     Event::<T>::ContractPurged(requester, contract_name)
                 );
+                Ok(())
             }
-            Ok(())
         }
     }
 }

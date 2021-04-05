@@ -1,17 +1,13 @@
-#![allow(unused_must_use)]
-
-use crate::{
-    mock::*, ContractRegistry, Event as RegistryEvent, RegistryContract,
-};
-use frame_support::{
-    assert_err, assert_ok, assert_storage_noop, StorageDoubleMap,
-};
+use crate::{mock::*, ContractRegistry, Error, Event as RegistryEvent};
+use frame_support::{assert_err, assert_noop, assert_ok, StorageDoubleMap};
 use frame_system::{EventRecord, Phase};
 use sp_runtime::traits::BadOrigin;
 
 // NOTE
 // Using `run_to_block(2)` cos block#1 never includes events.
-// Annotation #![allow(unused_must_use)] cos `assert_storage_noop` complains.
+// Seems one can use refs in the `Registry::contract` getter, so either or..
+//   + `Registry::contract(&T::AccountId, &[u8])`
+//   + `Registry::contract(T::AccountId, Vec<u8>),`
 
 #[test]
 fn it_stores_a_contract_in_the_registry() {
@@ -22,17 +18,13 @@ fn it_stores_a_contract_in_the_registry() {
             Origin::root(),
             REQUESTER,
             contract_name(),
-            RegistryContract {
-                code_txt: code_txt(),
-                bytes: bytes(),
-                abi: None,
-            },
+            contract(),
         ));
 
-        assert!(<ContractRegistry<Test>>::contains_key(
-            REQUESTER,
-            contract_name()
-        ));
+        assert_eq!(
+            Registry::contract(&REQUESTER, &contract_name()),
+            Some(contract())
+        );
 
         assert_eq!(
             System::events(),
@@ -51,7 +43,7 @@ fn it_stores_a_contract_in_the_registry() {
 }
 
 #[test]
-fn it_stores_idempotent() {
+fn it_fails_to_store_a_contract_if_its_key_already_exists() {
     new_test_ext().execute_with(|| {
         run_to_block(2);
 
@@ -59,27 +51,18 @@ fn it_stores_idempotent() {
             Origin::root(),
             REQUESTER,
             contract_name(),
-            RegistryContract {
-                code_txt: code_txt(),
-                bytes: bytes(),
-                abi: None,
-            },
+            contract(),
         ));
 
-        let dispatch = Registry::store_contract(
-            Origin::root(),
-            REQUESTER,
-            contract_name(),
-            RegistryContract {
-                code_txt: code_txt(),
-                bytes: bytes(),
-                abi: None,
-            },
+        assert_noop!(
+            Registry::store_contract(
+                Origin::root(),
+                REQUESTER,
+                contract_name(),
+                contract(),
+            ),
+            Error::<Test>::KeyAlreadyExists
         );
-
-        assert_ok!(dispatch);
-
-        assert_storage_noop!(dispatch);
 
         assert_eq!(
             System::events(),
@@ -98,7 +81,7 @@ fn it_stores_idempotent() {
 }
 
 #[test]
-fn it_removes_a_contract_from_the_registry() {
+fn it_purges_a_contract_from_the_registry() {
     new_test_ext().execute_with(|| {
         run_to_block(2);
 
@@ -106,11 +89,7 @@ fn it_removes_a_contract_from_the_registry() {
             Origin::root(),
             REQUESTER,
             contract_name(),
-            RegistryContract {
-                code_txt: code_txt(),
-                bytes: bytes(),
-                abi: None,
-            },
+            contract(),
         ));
 
         assert_ok!(Registry::purge_contract(
@@ -119,10 +98,7 @@ fn it_removes_a_contract_from_the_registry() {
             contract_name()
         ));
 
-        assert!(!<ContractRegistry<Test>>::contains_key(
-            REQUESTER,
-            contract_name()
-        ));
+        assert_eq!(Registry::contract(REQUESTER, contract_name()), None);
 
         assert_eq!(
             System::events(),
@@ -153,7 +129,7 @@ fn it_removes_a_contract_from_the_registry() {
 }
 
 #[test]
-fn it_removes_idempotent() {
+fn it_fails_to_purge_a_contract_if_its_key_does_not_exist() {
     new_test_ext().execute_with(|| {
         run_to_block(2);
 
@@ -161,11 +137,7 @@ fn it_removes_idempotent() {
             Origin::root(),
             REQUESTER,
             contract_name(),
-            RegistryContract {
-                code_txt: code_txt(),
-                bytes: bytes(),
-                abi: None,
-            },
+            contract(),
         ));
 
         assert_ok!(Registry::purge_contract(
@@ -174,15 +146,14 @@ fn it_removes_idempotent() {
             contract_name()
         ));
 
-        let dispatch = Registry::purge_contract(
-            Origin::root(),
-            REQUESTER,
-            contract_name(),
+        assert_noop!(
+            Registry::purge_contract(
+                Origin::root(),
+                REQUESTER,
+                contract_name(),
+            ),
+            Error::<Test>::KeyDoesNotExist
         );
-
-        assert_ok!(dispatch);
-
-        assert_storage_noop!(dispatch);
 
         assert_eq!(
             System::events(),
@@ -224,6 +195,13 @@ fn it_stores_contracts_separately_per_requester() {
 }
 
 #[test]
+fn it_gets_none_for_non_existing_contracts() {
+    new_test_ext().execute_with(|| {
+        assert_eq!(Registry::contract(REQUESTER, contract_name()), None);
+    });
+}
+
+#[test]
 fn it_fails_for_non_root_origins() {
     new_test_ext().execute_with(|| {
         run_to_block(2);
@@ -233,11 +211,7 @@ fn it_fails_for_non_root_origins() {
                 Origin::signed(419),
                 REQUESTER,
                 contract_name(),
-                RegistryContract {
-                    code_txt: code_txt(),
-                    bytes: bytes(),
-                    abi: None,
-                },
+                contract(),
             ),
             BadOrigin
         );
@@ -247,11 +221,7 @@ fn it_fails_for_non_root_origins() {
                 Origin::none(),
                 REQUESTER,
                 contract_name(),
-                RegistryContract {
-                    code_txt: code_txt(),
-                    bytes: bytes(),
-                    abi: None,
-                },
+                contract(),
             ),
             BadOrigin
         );
