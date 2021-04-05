@@ -26,12 +26,13 @@ pub struct RegistryContract {
 }
 
 decl_storage! {
-    trait Store for Module<T: Config> as ContractRegistry {
+    trait Store for Module<T: Config> as ContractRegistryModule {
         /// ( requester, contract_name ) -> Option<RegistryContract>
-        ContractRegistry get(fn registry):
-            double_map hasher(blake2_128_concat)
-                T::AccountId, hasher(blake2_128_concat) Vec<u8>
-                => Option<RegistryContract>;
+        ContractRegistry get(fn contract_registry):
+            double_map 
+                hasher(blake2_128_concat) T::AccountId,
+                hasher(blake2_128_concat) Vec<u8>
+                    => Option<RegistryContract>;
     }
 }
 
