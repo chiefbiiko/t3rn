@@ -60,7 +60,7 @@ decl_module! {
         type Error = Error<T>;
         fn deposit_event() = default;
 
-        /// Inserts a contract to the on-chain registry. Root only access.
+        /// Inserts a contract into the onchain registry. Root only access.
         /// TODO weight
         #[weight = 10_419]
         pub fn store_contract(
@@ -88,7 +88,7 @@ decl_module! {
             }
         }
 
-        /// Removes a contract from the on-chain registry. Root only access.
+        /// Removes a contract from the onchain registry. Root only access.
         /// TODO weight
         #[weight = 10_419]
         pub fn purge_contract(
