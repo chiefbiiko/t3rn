@@ -165,7 +165,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         select_chain,
         transaction_pool,
         inherent_data_providers,
-        other: (block_import, grandpa_link, telemetry),
+        other: (block_import, grandpa_link, mut telemetry),
     } = new_partial(&config)?;
 
     if let Some(url) = &config.keystore_remote {
@@ -424,7 +424,10 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
 		.transpose()?;
 
     let (client, backend, keystore_container, mut task_manager, on_demand) =
-        sc_service::new_light_parts::<Block, RuntimeApi, Executor>(&config)?;
+        sc_service::new_light_parts::<Block, RuntimeApi, Executor>(
+            &config,
+            telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
+        )?;
 
     let mut telemetry = telemetry
 		.map(|(worker, telemetry)| {
