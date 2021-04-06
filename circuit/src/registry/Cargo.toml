@@ -1,6 +1,6 @@
 [package]
 authors = ['0x1a3']
-description = 'FRAME pallet encapsulating the t3rn composable contracts registry.'
+description = 'FRAME pallet encapsulating the onchain contract registry.'
 edition = '2018'
 homepage = 'https://t3rn.io'
 license = 'Unlicense'
@@ -24,6 +24,7 @@ frame-support = { default-features = false, git = "https://github.com/paritytech
 frame-system = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
 sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
 sp-std = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
+t3rn-primitives = { default-features = false, path = "../primitives" }
 
 [dev-dependencies]
 serde = { version = "1.0.119" }

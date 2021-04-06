@@ -1,74 +1,92 @@
-# Substrate Pallet Template
+# Pallet Registry
 
-This is a template for a Substrate pallet which lives as its own crate so it can be imported into multiple runtimes. It is based on the ["template" pallet](https://github.com/paritytech/substrate/tree/master/bin/node-template/pallets/template) that is included with the [Substrate node template](https://github.com/paritytech/substrate/tree/master/bin/node-template).
+This FRAME pallet contours the onchain contract repository.
 
-Check out the [HOWTO](HOWTO.md) to learn how to use this for your own runtime module.
+Apart from System it has no pallet dependencies. Latest known Substrate commit compatible with this Registry pallet and its integration in the `circuit-runtime` is [`d5f992fc3987301c67c1deccb1bbdccc8ae63cea`](https://github.com/paritytech/substrate/tree/d5f992fc3987301c67c1deccb1bbdccc8ae63cea).
 
-This README should act as a general template for distributing your pallet to others.
+## Interface
 
-## Purpose
-
-This pallet acts as a template for building other pallets.
-
-It currently allows a user to put a `u32` value into storage, which triggers a runtime event.
-
-## Dependencies
-
-### Traits
-
-This pallet does not depend on any externally defined traits.
-
-### Pallets
-
-This pallet does not depend on any other FRAME pallet or externally developed modules.
-
-## Installation
-
-### Runtime `Cargo.toml`
-
-To add this pallet to your runtime, simply include the following to your runtime's `Cargo.toml` file:
-
-```TOML
-[dependencies.pallet-template]
-default_features = false
-git = 'https://github.com/substrate-developer-hub/substrate-pallet-template.git'
-```
-
-and update your runtime's `std` feature to include this pallet:
-
-```TOML
-std = [
-    # --snip--
-    'pallet-template/std',
-]
-```
-
-### Runtime `lib.rs`
-
-You should implement it's trait like so:
+Introduces a new Circuit primitive.
 
 ```rust
-/// Used for test_module
-impl pallet_template::Config for Runtime {
-	type Event = Event;
+/// A preliminary representation of a contract in the onchain registry.
+#[derive(PartialEq, Eq, Encode, Decode, Default, Clone, Debug)]
+pub struct RegistryContract {
+    code_txt: Vec<u8>,
+    bytes: Vec<u8>,
+    abi: Option<Vec<u8>>,
 }
 ```
 
-and include it in your `construct_runtime!` macro:
-
+#### store_contract
+##### Parameters
 ```rust
-TemplatePallet: pallet_template::{Module, Call, Storage, Event<T>},
+pub fn store_contract(
+    origin, // Root origin
+    requester: T::AccountId, // Account that requested the execution.
+    contract_name: Vec<u8>, // Human-readable contract name.
+    contract: RegistryContract // Contract artifacts.
+) -> dispatch::DispatchResult
+```
+##### Description
+Stores provided contract in the onchain registry, separately per requester. Fails if a contract's storage key already exists. Root only access.
+
+#### purge_contract
+##### Parameters
+```rust
+pub fn purge_contract(
+    origin, // Root origin
+    requester: T::AccountId, // Account that requested the execution.
+    contract_name: Vec<u8>, // Human-readable contract name.
+) -> dispatch::DispatchResult
+```
+##### Description
+Purges a contract from the onchain registry. Fails if a contract's storage key does not exist. Root only access.
+
+#### Registry::contract
+##### Parameters
+```rust
+Registry::contract(
+    requester: T::AccountId, // Account that requested the execution.
+    contract_name_hash: T::Hash // Hash of the contract name.
+) -> Option<RegistryContract>
 ```
 
-### Genesis Configuration
+##### Description
+A pallet-level getter exposing the contract registry onchain storage.
 
-The `contract-registry` pallet does not have any genesis configuration.
+## Events
 
-## Reference Docs
+#### ContractStored
 
-You can view the reference docs for this pallet by running:
-
+##### Parameters
+```rust
+/// [requester, contract_name]
+ContractStored(AccountId, Vec<u8>)
 ```
-cargo doc --open
+
+##### Description
+Emitted for a every stored contract.
+
+#### ContractPurged
+
+##### Parameters
+```rust
+/// [requester, contract_name]
+ContractPurged(AccountId, Vec<u8>)
 ```
 
+##### Description
+Emitted for a every purged contract.
+
+## Errors
+
+#### KeyDoesNotExist
+
+##### Description
+The storage key for the contract does not exist. Possibly encountered when purging a contract.
+
+#### KeyAlreadyExists
+
+##### Description
+The storage key for the contract does already exist. Possibly encountered when storing a contract.
