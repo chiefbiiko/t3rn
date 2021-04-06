@@ -6,6 +6,7 @@ use frame_support::{
 };
 use frame_system::ensure_root;
 use sp_runtime::traits::Hash;
+use sp_std::prelude::Vec;
 
 #[cfg(test)]
 mod mock;
