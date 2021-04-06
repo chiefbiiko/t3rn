@@ -7,7 +7,7 @@ use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
-    traits::{BlakeTwo256, IdentityLookup},
+    traits::{BlakeTwo256, Hash, IdentityLookup},
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -74,7 +74,7 @@ pub fn contract_name() -> Vec<u8> {
 }
 
 pub fn contract_name_hash() -> <Test as frame_system::Config>::Hash {
-    Test::Hashing::hash(contract_name())
+    <Test as frame_system::Config>::Hashing::hash(&contract_name())
 }
 
 /// The mock wasm noop registry contract.

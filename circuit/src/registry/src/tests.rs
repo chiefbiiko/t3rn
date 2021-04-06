@@ -17,7 +17,7 @@ fn it_stores_a_contract_in_the_registry() {
         assert_ok!(Registry::store_contract(
             Origin::root(),
             REQUESTER,
-            b"MockRegistryContractV0",
+            contract_name(),
             contract(),
         ));
 
@@ -33,7 +33,7 @@ fn it_stores_a_contract_in_the_registry() {
                 event: Event::pallet_registry(
                     RegistryEvent::<Test>::ContractStored(
                         REQUESTER,
-                        contract_name_hash(),
+                        contract_name(),
                     )
                 ),
                 topics: vec![],

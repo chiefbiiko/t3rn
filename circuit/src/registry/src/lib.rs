@@ -40,12 +40,11 @@ decl_event!(
     pub enum Event<T>
     where
         AccountId = <T as frame_system::Config>::AccountId,
-        ContractName = &[u8],
     {
         /// \[requester, contract_name\]
-        ContractStored(AccountId, ContractName),
+        ContractStored(AccountId, Vec<u8>),
         /// \[requester, contract_name\]
-        ContractPurged(AccountId, ContractName),
+        ContractPurged(AccountId, Vec<u8>),
     }
 );
 
@@ -67,15 +66,12 @@ decl_module! {
         pub fn store_contract(
             origin,
             requester: T::AccountId,
-            contract_name: &[u8],
+            contract_name: Vec<u8>,
             contract: RegistryContract
         ) -> dispatch::DispatchResult {
             ensure_root(origin)?;
-            let name_hash = T::Hashing::hash(contract_name);
-            if <ContractRegistry<T>>::contains_key(
-                &requester,
-                &name_hash
-            ) {
+            let name_hash = T::Hashing::hash(&contract_name);
+            if <ContractRegistry<T>>::contains_key(&requester, &name_hash) {
                 Err(Error::<T>::KeyAlreadyExists)?
             } else {
                 <ContractRegistry<T>>::insert(
@@ -96,14 +92,11 @@ decl_module! {
         pub fn purge_contract(
             origin,
             requester: T::AccountId,
-            contract_name: &[u8],
+            contract_name: Vec<u8>,
         ) -> dispatch::DispatchResult {
             ensure_root(origin)?;
-            let name_hash = T::Hashing::hash(contract_name);
-            if !<ContractRegistry<T>>::contains_key(
-                &requester,
-                &name_hash
-            ) {
+            let name_hash = T::Hashing::hash(&contract_name);
+            if !<ContractRegistry<T>>::contains_key(&requester, &name_hash) {
                 Err(Error::<T>::KeyDoesNotExist)?
             } else {
                 <ContractRegistry<T>>::remove(&requester, &name_hash);
