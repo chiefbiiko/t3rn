@@ -20,16 +20,16 @@ package = 'parity-scale-codec'
 version = '2.0.0'
 
 [dependencies]
-frame-support = { default-features = false, git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0" }
-frame-system = { default-features = false, git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0" }
-sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0" }
-sp-std = { default-features = false, git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0" }
+frame-support = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
+frame-system = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
+sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
+sp-std = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
 
 [dev-dependencies]
 serde = { version = "1.0.119" }
-sp-core = { features = ["std"], git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0" }
-sp-io = { features = ["std"], git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0" }
-sp-runtime = { features = ["std"], git = "https://github.com/paritytech/substrate.git", tag = "v3.0.0" }
+sp-core = { features = ["std"], git = "https://github.com/paritytech/substrate.git", branch = "master" }
+sp-io = { features = ["std"], git = "https://github.com/paritytech/substrate.git", branch = "master" }
+sp-runtime = { features = ["std"], git = "https://github.com/paritytech/substrate.git", branch = "master" }
 
 [features]
 default = ['std']
@@ -37,4 +37,6 @@ std = [
     'codec/std',
     'frame-support/std',
     'frame-system/std',
+    'sp-runtime/std',   
+    'sp-std/std',
 ]

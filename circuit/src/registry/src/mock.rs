@@ -3,7 +3,6 @@ use frame_support::{
     parameter_types,
     traits::{OnFinalize, OnInitialize},
 };
-use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
@@ -19,8 +18,8 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Registry: pallet_registry::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        Registry: pallet_registry::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -29,7 +28,7 @@ parameter_types! {
     pub const SS58Prefix: u8 = 42;
 }
 
-impl system::Config for Test {
+impl frame_system::Config for Test {
     type BaseCallFilter = ();
     type BlockWeights = ();
     type BlockLength = ();
@@ -52,6 +51,7 @@ impl system::Config for Test {
     type OnKilledAccount = ();
     type SystemWeightInfo = ();
     type SS58Prefix = SS58Prefix;
+    type OnSetCode = ();
 }
 
 impl pallet_registry::Config for Test {
@@ -59,7 +59,7 @@ impl pallet_registry::Config for Test {
 }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    system::GenesisConfig::default()
+    frame_system::GenesisConfig::default()
         .build_storage::<Test>()
         .unwrap()
         .into()
