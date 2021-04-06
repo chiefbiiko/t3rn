@@ -20,17 +20,17 @@ package = 'parity-scale-codec'
 version = '2.0.0'
 
 [dependencies]
-frame-support = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
-frame-system = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
-sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
-sp-std = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
+frame-support = { default-features = false, git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
+frame-system = { default-features = false, git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
+sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
+sp-std = { default-features = false, git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
 t3rn-primitives = { default-features = false, path = "../primitives" }
 
 [dev-dependencies]
 serde = { version = "1.0.119" }
-sp-core = { features = ["std"], git = "https://github.com/paritytech/substrate.git", branch = "master" }
-sp-io = { features = ["std"], git = "https://github.com/paritytech/substrate.git", branch = "master" }
-sp-runtime = { features = ["std"], git = "https://github.com/paritytech/substrate.git", branch = "master" }
+sp-core = { features = ["std"], git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
+sp-io = { features = ["std"], git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
+sp-runtime = { features = ["std"], git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
 
 [features]
 default = ['std']

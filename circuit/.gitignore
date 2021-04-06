@@ -20,5 +20,3 @@
 *.iml
 *.swp
 *.swo
-
-**/Cargo.lock
