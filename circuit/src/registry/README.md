@@ -6,7 +6,7 @@ Apart from System it has no pallet dependencies. Latest known Substrate commit c
 
 ## Interface
 
-Introduces a new Circuit primitive.
+#### RegistryContract
 
 ```rust
 /// A preliminary representation of a contract in the onchain registry.
@@ -43,10 +43,10 @@ pub fn purge_contract(
 ##### Description
 Purges a contract from the onchain registry. Fails if a contract's storage key does not exist. Root only access.
 
-#### Registry::contract
+#### contract
 ##### Parameters
 ```rust
-Registry::contract(
+pub fn contract(
     requester: T::AccountId, // Account that requested the execution.
     contract_name_hash: T::Hash // Hash of the contract name.
 ) -> Option<RegistryContract>
