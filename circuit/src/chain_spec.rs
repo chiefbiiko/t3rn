@@ -154,30 +154,30 @@ fn testnet_genesis(
     _enable_println: bool,
 ) -> GenesisConfig {
     GenesisConfig {
-        frame_system: Some(SystemConfig {
+        frame_system: SystemConfig {
             code: WASM_BINARY.to_vec(),
             changes_trie_config: Default::default(),
-        }),
-        pallet_balances: Some(BalancesConfig {
+        },
+        pallet_balances: BalancesConfig {
             balances: endowed_accounts
                 .iter()
                 .cloned()
                 .map(|k| (k, 1 << 50))
                 .collect(),
-        }),
-        pallet_aura: Some(AuraConfig {
+        },
+        pallet_aura: AuraConfig {
             authorities: Vec::new(),
-        }),
-        pallet_grandpa: Some(GrandpaConfig {
+        },
+        pallet_grandpa: GrandpaConfig {
             authorities: Vec::new(),
-        }),
-        pallet_substrate_bridge: Some(BridgeGatewayConfig {
+        },
+        pallet_substrate_bridge: BridgeGatewayConfig {
             // We'll initialize the pallet with a dispatchable instead.
             init_data: None,
             owner: Some(root_key.clone()),
-        }),
-        pallet_sudo: Some(SudoConfig { key: root_key }),
-        pallet_session: Some(SessionConfig {
+        },
+        pallet_sudo: SudoConfig { key: root_key },
+        pallet_session: SessionConfig {
             keys: initial_authorities
                 .iter()
                 .map(|x| {
@@ -188,7 +188,7 @@ fn testnet_genesis(
                     )
                 })
                 .collect::<Vec<_>>(),
-        }),
+        },
     }
 }
 
