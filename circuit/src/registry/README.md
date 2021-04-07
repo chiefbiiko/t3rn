@@ -2,7 +2,7 @@
 
 This FRAME pallet contours the onchain contract repository.
 
-Apart from System it has no pallet dependencies. Latest known Substrate commit compatible with this Registry pallet and its integration in the `circuit-runtime` is [`d5f992fc3987301c67c1deccb1bbdccc8ae63cea`](https://github.com/paritytech/substrate/tree/d5f992fc3987301c67c1deccb1bbdccc8ae63cea).
+Apart from System it has no pallet dependencies. Latest known Substrate commit compatible with this Registry pallet is [`d5f992fc3987301c67c1deccb1bbdccc8ae63cea`](https://github.com/paritytech/substrate/tree/d5f992fc3987301c67c1deccb1bbdccc8ae63cea).
 
 ## Interface
 

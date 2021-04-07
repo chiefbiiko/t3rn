@@ -1,5 +1,5 @@
 [package]
-authors = ['0x1a3']
+authors = ["Noah Anabiik Schwarz @chiefbiiko"]
 description = 'FRAME pallet encapsulating the onchain contract registry.'
 edition = '2018'
 homepage = 'https://t3rn.io'
@@ -20,17 +20,17 @@ package = 'parity-scale-codec'
 version = '2.0.0'
 
 [dependencies]
-frame-support = { default-features = false, git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
-frame-system = { default-features = false, git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
-sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
-sp-std = { default-features = false, git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
+frame-support = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
+frame-system = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
+sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
+sp-std = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
 t3rn-primitives = { default-features = false, path = "../primitives" }
 
 [dev-dependencies]
 serde = { version = "1.0.119" }
-sp-core = { features = ["std"], git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
-sp-io = { features = ["std"], git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
-sp-runtime = { features = ["std"], git = "https://github.com/paritytech/substrate.git", rev = "d5f992f" }
+sp-core = { features = ["std"], git = "https://github.com/paritytech/substrate.git", branch = "master" }
+sp-io = { features = ["std"], git = "https://github.com/paritytech/substrate.git", branch = "master" }
+sp-runtime = { features = ["std"], git = "https://github.com/paritytech/substrate.git", branch = "master" }
 
 [features]
 default = ['std']
