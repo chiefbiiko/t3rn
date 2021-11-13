@@ -9,8 +9,10 @@ on:
       - circuit-parachain/**/Cargo.toml
       - circuit-parachain/**/Cargo.lock
       - .github/workflows/circuit-parachain-release.yml
-    tags:
-      - 'v*'
+  release:
+    types:
+      - prereleased
+      - released
 
 env:
   RUST_BACKTRACE: 1
@@ -54,52 +56,49 @@ jobs:
           path: circuit-parachain/target/release/parachain-collator
           if-no-files-found: error
 
-  push-to-docker:
-    runs-on: ubuntu-20.04
-    needs: [build-release]
-    steps:
-      - name: ☁️Checkout git repo
-        uses: actions/checkout@master
-        with:
-          submodules: recursive
-      - name: 🔧 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: 🕒 Cache Docker layers
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-      - name: 📥 Download circuit
-        uses: actions/download-artifact@v2
-        with:
-          name: ${{ github.sha }}-parachain-release-artifacts
-          path: circuit-parachain/target/release/
-      - name: 🐋 Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: 🐳 Build & Publish Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: t3rn/circuit-parachain:latest
-          platforms: linux/amd64
-          file: docker/circuit-parachain.Dockerfile
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+  # push-to-docker:
+  #   runs-on: ubuntu-20.04
+  #   needs: [build-release]
+  #   steps:
+  #     - name: ☁️Checkout git repo
+  #       uses: actions/checkout@master
+  #       with:
+  #         submodules: recursive
+  #     - name: 🔧 Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v1
+  #     - name: 🕒 Cache Docker layers
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: /tmp/.buildx-cache
+  #         key: ${{ runner.os }}-buildx-${{ github.sha }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-buildx-
+  #     - name: 📥 Download circuit
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: ${{ github.sha }}-parachain-release-artifacts
+  #         path: circuit-parachain/target/release/
+  #     - name: 🐋 Login to Docker Hub
+  #       uses: docker/login-action@v1
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     - name: 🐳 Build & Publish Docker image
+  #       uses: docker/build-push-action@v2
+  #       with:
+  #         context: .
+  #         push: true
+  #         tags: t3rn/circuit-parachain:latest
+  #         platforms: linux/amd64
+  #         file: docker/circuit-parachain.Dockerfile
+  #         cache-from: type=local,src=/tmp/.buildx-cache
+  #         cache-to: type=local,dest=/tmp/.buildx-cache
 
   release-on-github:
     runs-on: ubuntu-20.04
     needs: build-release
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: ${{ github.event_name == 'release' }}
     steps:
-      - name: ☁ Checkout git repo
-        uses: actions/checkout@v2
-
       - name: 📥 Download circuit parachain
         uses: actions/download-artifact@v2
         with:
@@ -115,47 +114,18 @@ jobs:
         run: |
           sha256sum -b ./circuit-parachain/target/release/parachain-collator.gz \
           | grep -oE '^[a-f0-9]+' \
+          | tr -d '\n' \
           > ./circuit-parachain/target/release/parachain-collator.gz.sha256sum
 
       - name: 🏷️ Get the version tag
         run: echo "PUSHED_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
-
-      - name: 🖍️ Get the release name
-        run: |
-          release_name="$(git tag -l --format='%(contents:subject)' ${{ env.PUSHED_TAG }})"
-          release_name=${release_name:-${{ env.PUSHED_TAG }}}
-          echo "RELEASE_NAME=\"$release_name\"" >> $GITHUB_ENV
-
-      - name: 🖨️ Get the release notes
-        run: |
-          release_notes="$(sed -n '/## `${{ env.PUSHED_TAG }}/{:a;n;/##/b;p;ba}' ./CHANGELOG.md)"
-          if [[ -z "${release_notes// }" ]]; then
-            release_notes="$(sed -n '/## ${{ env.PUSHED_TAG }}/{:a;n;/##/b;p;ba}' ./CHANGELOG.md)"
-            if [[ -z "${release_notes// }" ]]; then
-              echo "failed parsing release notes for ${{ env.PUSHED_TAG }} from CHANGELOG.md" >&2
-              exit 1
-            fi
-          fi
-          echo "$release_notes" > ./circuit/target/release/notes.txt
-
-      - name: 🐙 Draft a prerelease
-        id: create_release
-        uses: actions/create-release@v1.1.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.PUSHED_TAG }}
-          release_name: ${{ env.RELEASE_NAME }}
-          body_path: ./circuit/target/release/notes.txt
-          draft: true
-          prerelease: true
 
       - name: 🍔 Provide the sha256sum as a release asset
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./circuit-parachain/target/release/parachain-collator.gz.sha256sum
           asset_name: t3rn-circuit-parachain-collator-${{ env.PUSHED_TAG }}-x86_64-unknown-linux-gnu.gz.sha256sum
           asset_content_type: text/plain
@@ -165,7 +135,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./circuit-parachain/target/release/parachain-collator.gz
           asset_name: t3rn-circuit-parachain-collator-${{ env.PUSHED_TAG }}-x86_64-unknown-linux-gnu.gz
           asset_content_type: application/gzip
